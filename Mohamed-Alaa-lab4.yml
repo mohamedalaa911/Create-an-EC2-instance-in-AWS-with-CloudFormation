@@ -1,0 +1,69 @@
+
+Parameters:
+  VpcName:
+    Description: Name of VPC
+    Type: String
+  PublicSubName:
+    Description: Public Subnet
+    Type: String
+  PrivateSubName:
+    Description: Private Subnet
+    Type: String 
+  InstanceName:
+    Description: Instance Name
+    Type: String
+  SecGroupName:
+    Description: Sec Group Name
+    Type: String 
+Resources:
+  MyVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "192.168.200.0/16"
+      Tags:
+        - Key: Name
+          Value: !Ref VpcName
+  PublicSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "us-east-2a" 
+      VpcId: !Ref MyVPC
+      CidrBlock: "192.168.200.0/24"
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Ref PublicSubName
+  PrivateSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "us-east-2b" 
+      VpcId: !Ref MyVPC
+      CidrBlock: "192.168.200.1/24"
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Ref PrivateSubName
+  MySecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Allow SSH and HTTP access"
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+  
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: "ami-0615bfdc319d617b1"
+      InstanceType: "t2.micro"
+      KeyName: "ec2-moalaa"
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
